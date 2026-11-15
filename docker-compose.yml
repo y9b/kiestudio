@@ -1,0 +1,12 @@
+services:
+  kiestudio:
+    build: .
+    container_name: kiestudio
+    ports:
+      - "8787:8787"
+    environment:
+      # Read from your .env (or leave empty and set the key in the app's Settings screen)
+      KIE_API_KEY: ${KIE_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
