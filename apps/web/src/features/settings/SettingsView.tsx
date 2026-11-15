@@ -100,7 +100,7 @@ function ApiKeyCard({ s }: { s: Settings | undefined }) {
             href="https://kie.ai/api-key"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-primary hover:underline"
+            className="inline-flex items-center gap-1.5 text-foreground underline-offset-4 hover:underline"
           >
             {t("settings.getKey")} <ExternalLink className="size-3.5" />
           </a>
@@ -224,7 +224,7 @@ export function SettingsView() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-8 md:py-10">
       <header>
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-          <SettingsIcon className="size-6 text-primary" /> {t("settings.title")}
+          <SettingsIcon className="size-6 text-foreground/80" strokeWidth={1.75} /> {t("settings.title")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("settings.subtitle")}</p>
       </header>

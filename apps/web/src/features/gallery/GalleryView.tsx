@@ -4,6 +4,7 @@ import { Button } from "@/components/motion/button";
 import { InfiniteMasonry } from "@/components/motion/infinite-masonry";
 import { Input } from "@/components/motion/input";
 import { Loader } from "@/components/motion/loader";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/motion/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/motion/tabs";
 import { isPending, type Generation } from "@/lib/api";
 import { useT, type MessageKey } from "@/i18n";
@@ -44,14 +45,25 @@ export function GalleryView() {
   const t = useT();
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
+  const [modelFilter, setModelFilter] = useState("all");
+
+  // Models that appear in the history, most used first.
+  const modelOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const g of data ?? []) counts.set(g.model, (counts.get(g.model) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [data]);
   const [openId, setOpenId] = useState<string | null>(null);
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (data ?? []).filter(
-      (g) => matches(g, filter) && (!q || g.prompt.toLowerCase().includes(q) || g.model.toLowerCase().includes(q)),
+      (g) =>
+        matches(g, filter) &&
+        (modelFilter === "all" || g.model === modelFilter) &&
+        (!q || g.prompt.toLowerCase().includes(q) || g.model.toLowerCase().includes(q)),
     );
-  }, [data, filter, query]);
+  }, [data, filter, query, modelFilter]);
 
   const open = data?.find((g) => g.id === openId) ?? null;
 
@@ -60,7 +72,7 @@ export function GalleryView() {
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <Images className="size-6 text-primary" /> {t("gallery.title")}
+            <Images className="size-6 text-foreground/80" strokeWidth={1.75} /> {t("gallery.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {data
@@ -70,7 +82,23 @@ export function GalleryView() {
               : t("gallery.loading")}
           </p>
         </div>
-        <div className="w-full md:w-72">
+        <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto">
+          <div className="sm:w-60">
+            <Select value={modelFilter} onValueChange={setModelFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder={t("gallery.filterModel")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("gallery.allModels")}</SelectItem>
+                {modelOptions.map(([model, count]) => (
+                  <SelectItem key={model} value={model}>
+                    {`${model} (${count})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="sm:w-64">
           <Input
             value={query}
             onChange={setQuery}
@@ -78,6 +106,7 @@ export function GalleryView() {
             leftIcon={<Search className="size-4" />}
             aria-label={t("gallery.search")}
           />
+          </div>
         </div>
       </header>
 
@@ -97,7 +126,7 @@ export function GalleryView() {
         </div>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border py-20 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="flex size-14 items-center justify-center text-muted-foreground">
             <Sparkles className="size-7" />
           </div>
           <div>

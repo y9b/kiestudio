@@ -41,7 +41,7 @@ function NavItem({
       {active && (
         <motion.span
           layoutId={layoutId}
-          className="absolute inset-0 rounded-xl border border-border bg-card shadow-sm"
+          className="absolute inset-0 rounded-xl bg-foreground/[0.04] backdrop-blur-md"
           transition={{ type: "spring", stiffness: 500, damping: 38 }}
         />
       )}
@@ -90,7 +90,7 @@ export function Sidebar() {
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background/80 p-4 backdrop-blur md:flex">
         <div className="mb-6 flex items-center justify-between px-1">
           <Logo />
-          <ThemeToggle variant="circle-blur" className="size-9 rounded-xl" />
+          <ThemeToggle variant="circle-blur" className="size-7 rounded-lg" iconClassName="size-3.5" />
         </div>
 
         <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">{t("nav.create")}</p>

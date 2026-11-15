@@ -26,7 +26,8 @@
     --card-foreground: var(--foreground);
     --popover: var(--card);
     --popover-foreground: var(--foreground);
-    --primary: #0285f7;
+    /* kieStudio: monochrome accent (near-black on light, white on dark) */
+    --primary: oklch(18% 0 0);
     --primary-foreground: #ffffff;
     --secondary: var(--card);
     --secondary-foreground: var(--foreground);
@@ -47,6 +48,8 @@
     --border-strong: rgb(255 255 255 / 0.1);
     --accent: oklch(80% 0.18 195);
     --accent-fg: #151515;
+    --primary: #f5f5f5;
+    --primary-foreground: #111111;
     --glass-bg: rgb(28 28 28 / 0.55);
     --glass-border: rgb(255 255 255 / 0.08);
     --glass-strong-bg: rgb(28 28 28 / 0.6);

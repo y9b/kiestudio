@@ -11,6 +11,7 @@ import { useAppState } from "@/state/app-state";
 import { useDeleteGeneration } from "@/state/queries";
 import { MediaPreview } from "./GenerationCard";
 import { StatusBadge } from "./StatusBadge";
+import { ZoomableImage } from "./ZoomableImage";
 
 function fmtDate(ts: number, lang: string) {
   return new Date(ts).toLocaleString(lang, { dateStyle: "short", timeStyle: "short" });
@@ -76,7 +77,13 @@ export function DetailModal({ gen, onClose }: { gen: Generation | null; onClose:
           >
             <div className="relative flex min-h-[260px] flex-1 items-center justify-center bg-black/90">
               {current ? (
-                <MediaPreview key={current} url={current} video={modeInfo(gen.mode).output === "video"} controls className="max-h-[70vh] w-auto max-w-full object-contain md:max-h-[85vh]" />
+                modeInfo(gen.mode).output === "video" ? (
+                  <MediaPreview key={current} url={current} video controls className="max-h-[70vh] w-auto max-w-full object-contain md:max-h-[85vh]" />
+                ) : (
+                  <div className="h-[60vh] w-full md:h-[85vh]">
+                    <ZoomableImage key={current} src={current} />
+                  </div>
+                )
               ) : isPending(gen.status) ? (
                 <Loader variant="metaballs" size={56} />
               ) : (

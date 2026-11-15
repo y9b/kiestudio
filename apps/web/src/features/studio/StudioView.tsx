@@ -67,10 +67,33 @@ export function StudioView() {
   const spec = useSpec(hasKey ? model : undefined);
   const info = modeInfo(mode);
   const catalogEntry = list.find((m) => m.model === model);
+  const { data: history } = useGenerations();
+  const usage = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const g of history ?? []) if (g.mode === mode) counts[g.model] = (counts[g.model] ?? 0) + 1;
+    return counts;
+  }, [history, mode]);
 
   useEffect(() => {
     if (model && model !== modelByMode[mode]) setModel(mode, model);
   }, [mode, model, modelByMode, setModel]);
+
+  // Switching models always shows a short loading state, even when the
+  // schema is already cached, so the change is visible.
+  const [switching, setSwitching] = useState(false);
+  const firstModel = useRef(true);
+  useEffect(() => {
+    if (!model) return;
+    if (firstModel.current) {
+      firstModel.current = false;
+      return;
+    }
+    setSwitching(true);
+    const timer = setTimeout(() => setSwitching(false), 650);
+    return () => clearTimeout(timer);
+  }, [model]);
+
+  const ready = Boolean(spec.data && model && spec.data.model === model && !switching);
 
   const picker = (
     <Panel title={t("studio.model")}>
@@ -82,7 +105,7 @@ export function StudioView() {
         <p className="text-sm text-destructive">{(models.error as Error).message}</p>
       ) : (
         <>
-          <ModelPicker mode={mode} models={list} value={model} onChange={(m) => setModel(mode, m)} />
+          <ModelPicker mode={mode} models={list} value={model} onChange={(m) => setModel(mode, m)} usage={usage} />
           {catalogEntry?.pricing && (
             <div className="mt-3 flex gap-2 rounded-xl bg-muted/60 p-3 text-[11px] leading-relaxed text-muted-foreground">
               <Coins className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
@@ -97,9 +120,7 @@ export function StudioView() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
       <header className="flex items-center gap-3">
-        <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-violet-500/20 text-primary">
-          <info.icon className="size-5" />
-        </div>
+        <info.icon className="size-6 shrink-0 text-foreground/80" strokeWidth={1.75} />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t(info.key("label"))}</h1>
           <p className="text-sm text-muted-foreground">{t(info.key("description"))}</p>
@@ -110,24 +131,40 @@ export function StudioView() {
         <div className="rounded-3xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
           {t("studio.noKey")}
         </div>
-      ) : spec.data && model ? (
-        <StudioForm
+      ) : ready ? (
+        <motion.div
           key={`${mode}:${model}:${draftVersion}`}
-          mode={mode}
-          model={model}
-          spec={spec.data}
-          picker={picker}
-        />
+          initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.28, ease: "easeOut" }}
+        >
+          <StudioForm mode={mode} model={model!} spec={spec.data!} picker={picker} />
+        </motion.div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex min-h-64 items-center justify-center rounded-3xl border border-border bg-card/30">
+          <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-card/30">
             {spec.isError ? (
-              <p className="text-sm text-destructive">{(spec.error as Error).message}</p>
+              <p className="px-6 text-center text-sm text-destructive">{(spec.error as Error).message}</p>
             ) : (
-              <Loader variant="metaballs" size={40} />
+              <>
+                <Loader variant="metaballs" size={40} />
+                <span className="text-xs text-muted-foreground">{t("studio.loadingModel")}</span>
+              </>
             )}
           </div>
-          <div>{picker}</div>
+          <aside className="flex flex-col gap-4">
+            {picker}
+            <Panel title={t("studio.params")}>
+              <div className="flex flex-col gap-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex flex-col gap-2">
+                    <div className="h-3 w-20 animate-pulse rounded bg-foreground/10" />
+                    <div className="h-9 animate-pulse rounded-xl bg-foreground/[0.06]" />
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </aside>
         </div>
       )}
 

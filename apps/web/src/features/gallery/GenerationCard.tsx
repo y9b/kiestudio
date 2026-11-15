@@ -70,7 +70,7 @@ export function GenerationCard({ gen, onOpen, compact }: { gen: Generation; onOp
         {first ? (
           <MediaPreview url={first} video={info.output === "video"} className="block h-auto w-full transition duration-500 group-hover:scale-[1.02]" />
         ) : pending ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/10 via-transparent to-violet-500/10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-foreground/[0.02] backdrop-blur-sm">
             <Loader variant="metaballs" size={44} />
             <span className="text-xs text-muted-foreground tabular-nums">
               {gen.status === "generating" ? t("status.generating") : t("status.waiting")} · {elapsed}
